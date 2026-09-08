@@ -8,7 +8,8 @@ from app.models.watch_room import WatchParticipantRole, WatchRoomStatus
 class WatchRoomCreate(BaseModel):
     movie_id: UUID = Field(validation_alias=AliasChoices("movieId", "movie_id"), serialization_alias="movieId")
     club_id: int | None = Field(default=None, gt=0, validation_alias=AliasChoices("clubId", "club_id"), serialization_alias="clubId")
-    host_user_id: int = Field(gt=0, validation_alias=AliasChoices("hostUserId", "host_user_id"), serialization_alias="hostUserId")
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class WatchParticipantRead(BaseModel):
@@ -33,11 +34,11 @@ class WatchRoomRead(WatchRoomCreated):
 
 
 class WatchRoomJoin(BaseModel):
-    user_id: int = Field(gt=0, validation_alias=AliasChoices("userId", "user_id"), serialization_alias="userId")
     nickname: str = Field(min_length=1, max_length=100)
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class WatchRoomJoinResult(BaseModel):
     room_id: UUID = Field(serialization_alias="roomId")
     joined: bool = True
-

@@ -1,58 +1,35 @@
-def register(client, username="ana", email="ana@example.com", password="secret123"):
-    return client.post(
-        "/api/v1/auth/register",
-        json={
-            "username": username,
-            "email": email,
-            "password": password,
-            "display_name": "Ana",
-        },
-    )
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+
+import jwt
 
 
-def login(client, username="ana", password="secret123"):
-    return client.post(
-        "/api/v1/auth/login",
-        data={"username": username, "password": password},
-    )
-
-
-def test_register_login_create_club_and_join(client):
-    r = register(client)
-    assert r.status_code == 201
-
-    r = login(client)
-    assert r.status_code == 200
-    token = r.json()["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
-
-    r = client.post(
-        "/api/v1/clubs",
-        headers=headers,
-        json={
-            "name": "Cinefilos",
-            "description": "Club para hablar de cine",
-            "visibility": "PUBLIC",
-        },
-    )
-    assert r.status_code == 201
-    club_id = r.json()["id"]
-
-    r = client.get(f"/api/v1/clubs/{club_id}/members")
-    assert r.status_code == 200
-    members = r.json()
-    assert len(members) == 1
-    assert members[0]["role"] == "OWNER"
-
-    register(client, "luis", "luis@example.com", "secret123")
-    login_response = login(client, "luis", "secret123")
-    luis_headers = {
-        "Authorization": f"Bearer {login_response.json()['access_token']}"
+def identity_headers(subject=None, username="ana", email="ana@example.com", **extra):
+    payload = {
+        "sub": str(subject or uuid4()), "username": username, "email": email,
+        "iss": "identity-service", "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+        **extra,
     }
+    return {"Authorization": f"Bearer {jwt.encode(payload, 'test-secret', algorithm='HS256')}"}
 
-    r = client.post(
-        f"/api/v1/clubs/{club_id}/members",
-        headers=luis_headers,
-    )
-    assert r.status_code == 201
-    assert r.json()["role"] == "MEMBER"
+
+def test_identity_token_provisions_profile_and_creates_club(client):
+    headers = identity_headers()
+    me = client.get("/api/v1/users/me", headers=headers)
+    assert me.status_code == 200
+    assert me.json()["identity_user_id"]
+
+    club = client.post("/api/v1/clubs", headers=headers, json={
+        "name": "Cinefilos", "description": "Club para hablar de cine", "visibility": "PUBLIC",
+    })
+    assert club.status_code == 201
+    members = client.get(f"/api/v1/clubs/{club.json()['id']}/members")
+    assert members.status_code == 200
+    assert members.json()[0]["role"] == "OWNER"
+
+
+def test_rejects_invalid_issuer_and_expired_token(client):
+    wrong_issuer = identity_headers(iss="other-service")
+    assert client.get("/api/v1/users/me", headers=wrong_issuer).status_code == 401
+    expired = identity_headers(exp=datetime.now(timezone.utc) - timedelta(seconds=1))
+    assert client.get("/api/v1/users/me", headers=expired).status_code == 401

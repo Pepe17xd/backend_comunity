@@ -11,6 +11,9 @@ class UserRepository:
     def get(self, user_id: int) -> User | None:
         return self.db.get(User, user_id)
 
+    def get_by_identity_user_id(self, identity_user_id: str) -> User | None:
+        return self.db.scalar(select(User).where(User.identity_user_id == identity_user_id))
+
     def get_by_email(self, email: str) -> User | None:
         return self.db.scalar(select(User).where(User.email == email))
 

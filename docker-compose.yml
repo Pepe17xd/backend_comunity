@@ -19,7 +19,7 @@ services:
       - community_private
 
   api:
-    image: antony17xd/community-service:v1
+    image: antony17xd/community-service:v2
     build:
       context: .
     restart: unless-stopped

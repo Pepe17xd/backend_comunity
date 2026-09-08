@@ -2,6 +2,7 @@ import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test_community.db"
 os.environ["JWT_SECRET"] = "test-secret"
+os.environ["JWT_ISSUER"] = "identity-service"
 
 import pytest
 from fastapi.testclient import TestClient

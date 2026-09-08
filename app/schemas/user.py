@@ -1,14 +1,6 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
-
-class UserCreate(BaseModel):
-    username: str = Field(min_length=3, max_length=50)
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
-    display_name: str | None = Field(default=None, max_length=100)
-    bio: str | None = Field(default=None, max_length=500)
-    avatar_url: str | None = Field(default=None, max_length=500)
 
 
 class UserUpdate(BaseModel):
@@ -19,8 +11,9 @@ class UserUpdate(BaseModel):
 
 class UserRead(BaseModel):
     id: int
+    identity_user_id: str | None
     username: str
-    email: EmailStr
+    email: EmailStr | None
     display_name: str | None
     bio: str | None
     avatar_url: str | None
