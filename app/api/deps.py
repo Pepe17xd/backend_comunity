@@ -35,6 +35,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM],
             issuer=settings.JWT_ISSUER, options={"require": ["sub", "exp", "iss"]},
         )
+        print("JWT valido:",payload)
         identity_user_id = str(UUID(str(payload["sub"])))
     except (InvalidTokenError, ValueError, KeyError) as exc:
         raise credentials_error from exc
