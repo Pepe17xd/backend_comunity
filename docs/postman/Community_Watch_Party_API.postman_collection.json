@@ -1,0 +1,164 @@
+{
+  "info": {
+    "_postman_id": "932854f8-32ca-4a1f-b213-community-watch-party-api",
+    "name": "Community Watch Party API",
+    "description": "Coleccion generada mediante auditoria estatica del Community Service. Prefijo global: /api/v1. Autenticacion: JWT Bearer emitido por identity-service. Las rutas de lectura marcadas como publicas no declaran dependencia de autenticacion.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://IP_DE_LA_MAQUINA_VIRTUAL:PUERTO", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "1", "type": "string" },
+    { "key": "club_id", "value": "1", "type": "string" },
+    { "key": "room_code", "value": "ASTRA-0001", "type": "string" }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Comprueba disponibilidad del Community Service.", "url": "{{base_url}}/api/v1/health" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"status\": \"ok\",\n  \"service\": \"community-service\"\n}" }]
+        }
+      ]
+    },
+    {
+      "name": "FastAPI documentation",
+      "description": "Rutas generadas por FastAPI, disponibles porque app no redefine ni deshabilita docs_url, redoc_url u openapi_url.",
+      "item": [
+        {
+          "name": "OpenAPI schema",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Esquema OpenAPI JSON autogenerado por FastAPI.", "url": "{{base_url}}/openapi.json" },
+          "response": []
+        },
+        {
+          "name": "Swagger UI",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Interfaz Swagger UI autogenerada por FastAPI.", "url": "{{base_url}}/docs" },
+          "response": []
+        },
+        {
+          "name": "ReDoc",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Interfaz ReDoc autogenerada por FastAPI.", "url": "{{base_url}}/redoc" },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get current user",
+          "request": { "method": "GET", "description": "Devuelve el usuario local asociado al sub del JWT; si no existe, la dependencia puede crearlo al validar el token.", "url": "{{base_url}}/api/v1/users/me" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"identity_user_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"username\": \"ana\",\n  \"email\": \"ana@example.com\",\n  \"display_name\": \"Ana\",\n  \"bio\": null,\n  \"avatar_url\": null,\n  \"is_active\": true,\n  \"created_at\": \"2026-09-12T10:00:00\",\n  \"updated_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "List users",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Lista usuarios paginados. Query: skip >= 0 (0), limit entre 1 y 100 (50).", "url": { "raw": "{{base_url}}/api/v1/users?skip=0&limit=50", "query": [{ "key": "skip", "value": "0" }, { "key": "limit", "value": "50" }] } },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\n  \"id\": 1, \"identity_user_id\": \"550e8400-e29b-41d4-a716-446655440000\", \"username\": \"ana\", \"email\": \"ana@example.com\", \"display_name\": \"Ana\", \"bio\": null, \"avatar_url\": null, \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:00:00\"\n}]" }]
+        },
+        {
+          "name": "Get user by ID",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Obtiene un usuario por su identificador entero.", "url": "{{base_url}}/api/v1/users/{{user_id}}" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1, \"identity_user_id\": \"550e8400-e29b-41d4-a716-446655440000\", \"username\": \"ana\", \"email\": \"ana@example.com\", \"display_name\": \"Ana\", \"bio\": null, \"avatar_url\": null, \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "Update own user",
+          "request": { "method": "PUT", "description": "Actualiza solo el usuario cuyo ID coincide con el JWT. Body admite campos opcionales: display_name (max 100), bio (max 500), avatar_url (max 500).", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"display_name\": \"Ana Garcia\",\n  \"bio\": \"Amante del cine\",\n  \"avatar_url\": \"https://example.com/ana.jpg\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/users/{{user_id}}" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1, \"identity_user_id\": \"550e8400-e29b-41d4-a716-446655440000\", \"username\": \"ana\", \"email\": \"ana@example.com\", \"display_name\": \"Ana Garcia\", \"bio\": \"Amante del cine\", \"avatar_url\": \"https://example.com/ana.jpg\", \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:01:00\"\n}" }]
+        },
+        {
+          "name": "Deactivate own user",
+          "request": { "method": "DELETE", "description": "Desactiva solo el usuario autenticado. Respuesta sin body.", "url": "{{base_url}}/api/v1/users/{{user_id}}" },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+    {
+      "name": "Clubs",
+      "item": [
+        {
+          "name": "Create club",
+          "request": { "method": "POST", "description": "Crea un club y asigna al usuario JWT como OWNER. name: 3-120 caracteres; visibility: PUBLIC o PRIVATE.", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cine Clasico\",\n  \"description\": \"Comunidad para ver clasicos\",\n  \"visibility\": \"PUBLIC\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/clubs" },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\n  \"id\": 1, \"name\": \"Cine Clasico\", \"description\": \"Comunidad para ver clasicos\", \"owner_id\": 1, \"visibility\": \"PUBLIC\", \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "List active clubs",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Lista únicamente clubes activos. Query: skip >= 0, limit de 1 a 100.", "url": { "raw": "{{base_url}}/api/v1/clubs?skip=0&limit=50", "query": [{ "key": "skip", "value": "0" }, { "key": "limit", "value": "50" }] } },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\n  \"id\": 1, \"name\": \"Cine Clasico\", \"description\": \"Comunidad para ver clasicos\", \"owner_id\": 1, \"visibility\": \"PUBLIC\", \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:00:00\"\n}]" }]
+        },
+        {
+          "name": "Get club by ID",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Obtiene un club por ID. El código no filtra is_active en esta ruta.", "url": "{{base_url}}/api/v1/clubs/{{club_id}}" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1, \"name\": \"Cine Clasico\", \"description\": \"Comunidad para ver clasicos\", \"owner_id\": 1, \"visibility\": \"PUBLIC\", \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "Update club",
+          "request": { "method": "PUT", "description": "Requiere rol OWNER o ADMIN del club. Todos los campos son opcionales; name 3-120, visibility PUBLIC/PRIVATE.", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cine Clasico Peru\",\n  \"description\": \"Clasicos y conversacion\",\n  \"visibility\": \"PRIVATE\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/clubs/{{club_id}}" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1, \"name\": \"Cine Clasico Peru\", \"description\": \"Clasicos y conversacion\", \"owner_id\": 1, \"visibility\": \"PRIVATE\", \"is_active\": true, \"created_at\": \"2026-09-12T10:00:00\", \"updated_at\": \"2026-09-12T10:01:00\"\n}" }]
+        },
+        {
+          "name": "Deactivate club",
+          "request": { "method": "DELETE", "description": "Requiere rol OWNER. Establece is_active=false; respuesta sin body.", "url": "{{base_url}}/api/v1/clubs/{{club_id}}" },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+    {
+      "name": "Memberships",
+      "item": [
+        {
+          "name": "Join public club",
+          "request": { "method": "POST", "description": "Inscribe al usuario JWT como MEMBER. No recibe body. Los clubes PRIVATE devuelven 403 porque no hay flujo de invitacion implementado.", "url": "{{base_url}}/api/v1/clubs/{{club_id}}/members" },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\n  \"id\": 2, \"user_id\": 1, \"club_id\": 1, \"role\": \"MEMBER\", \"joined_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "List club members",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Lista membresias de un club; no exige autenticacion.", "url": "{{base_url}}/api/v1/clubs/{{club_id}}/members" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\n  \"id\": 1, \"user_id\": 1, \"club_id\": 1, \"role\": \"OWNER\", \"joined_at\": \"2026-09-12T10:00:00\"\n}]" }]
+        },
+        {
+          "name": "List user clubs",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Lista membresias de un usuario; no exige autenticacion.", "url": "{{base_url}}/api/v1/users/{{user_id}}/clubs" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[{\n  \"id\": 1, \"user_id\": 1, \"club_id\": 1, \"role\": \"OWNER\", \"joined_at\": \"2026-09-12T10:00:00\"\n}]" }]
+        },
+        {
+          "name": "Change member role",
+          "request": { "method": "PATCH", "description": "Requiere OWNER. role admite ADMIN o MEMBER en la practica; no permite modificar un OWNER ni transferir propiedad a OWNER.", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"role\": \"ADMIN\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/clubs/{{club_id}}/members/{{user_id}}/role" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 2, \"user_id\": 2, \"club_id\": 1, \"role\": \"ADMIN\", \"joined_at\": \"2026-09-12T10:00:00\"\n}" }]
+        },
+        {
+          "name": "Leave or remove member",
+          "request": { "method": "DELETE", "description": "Un miembro puede retirarse a si mismo. Para retirar a otro requiere OWNER o ADMIN. El OWNER no puede salir. Respuesta sin body.", "url": "{{base_url}}/api/v1/clubs/{{club_id}}/members/{{user_id}}" },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    },
+    {
+      "name": "Watch Rooms",
+      "item": [
+        {
+          "name": "Create watch room",
+          "request": { "method": "POST", "description": "Crea una sala y agrega al usuario JWT como HOST. movieId es UUID requerido; clubId es opcional y debe ser > 0. Si se envia clubId, el usuario debe pertenecer al club.", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"movieId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"clubId\": 1\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/watch-rooms" },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\n  \"id\": \"2c1e4a7b-1bf5-4d2a-a72f-1d8d7b5a6010\", \"code\": \"ASTRA-0001\", \"movieId\": \"550e8400-e29b-41d4-a716-446655440000\", \"status\": \"WAITING\"\n}" }]
+        },
+        {
+          "name": "Get watch room",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "description": "Obtiene una sala por codigo. La busqueda normaliza el codigo a mayusculas; no exige autenticacion.", "url": "{{base_url}}/api/v1/watch-rooms/{{room_code}}" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": \"2c1e4a7b-1bf5-4d2a-a72f-1d8d7b5a6010\", \"code\": \"ASTRA-0001\", \"movieId\": \"550e8400-e29b-41d4-a716-446655440000\", \"status\": \"WAITING\", \"participants\": [{ \"userId\": 1, \"nickname\": \"Ana\", \"role\": \"HOST\" }]\n}" }]
+        },
+        {
+          "name": "Join watch room",
+          "request": { "method": "POST", "description": "Agrega al usuario JWT como VIEWER. nickname requerido: 1-100 caracteres. En salas de club exige membresia.", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nickname\": \"Carlos\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{base_url}}/api/v1/watch-rooms/{{room_code}}/join" },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"roomId\": \"2c1e4a7b-1bf5-4d2a-a72f-1d8d7b5a6010\", \"joined\": true\n}" }]
+        },
+        {
+          "name": "Leave or remove room participant",
+          "request": { "method": "DELETE", "description": "El propio participante o el anfitrion puede retirarlo. En sala de club, OWNER/ADMIN del club tambien puede hacerlo. El HOST no puede salir. Respuesta sin body.", "url": "{{base_url}}/api/v1/watch-rooms/{{room_code}}/participants/{{user_id}}" },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    }
+  ]
+}
