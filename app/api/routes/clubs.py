@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db
 from app.models.membership import MembershipRole
 from app.models.user import User
-from app.schemas.club import ClubCreate, ClubRead, ClubUpdate
+from app.schemas.club import ClubCreate, ClubRead, ClubUpdate, PaginatedClubs
 from app.services.club_service import ClubService
 from app.services.membership_service import MembershipService
 
@@ -20,13 +20,15 @@ def create_club(
     return ClubService(db).create_club(payload, owner_id=current_user.id)
 
 
-@router.get("", response_model=list[ClubRead])
+@router.get("", response_model=PaginatedClubs)
 def list_clubs(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
+    search: str | None = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    return ClubService(db).list_clubs(skip=skip, limit=limit)
+    skip = (page - 1) * size
+    return ClubService(db).list_clubs(skip=skip, limit=size, search=search)
 
 
 @router.get("/{club_id}", response_model=ClubRead)

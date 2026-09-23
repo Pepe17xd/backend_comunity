@@ -41,8 +41,12 @@ class ClubService:
     def get_club(self, club_id: int) -> Club | None:
         return self.clubs.get(club_id)
 
-    def list_clubs(self, skip: int = 0, limit: int = 50) -> list[Club]:
-        return self.clubs.list(skip=skip, limit=limit)
+    def list_clubs(self, skip: int = 0, limit: int = 50, search: str | None = None) -> dict:
+        items = self.clubs.list(skip=skip, limit=limit, search=search)
+        total = self.clubs.count(search=search)
+        page = (skip // limit) + 1 if limit > 0 else 1
+        pages = (total + limit - 1) // limit if limit > 0 else 1
+        return {"items": items, "total": total, "page": page, "size": limit, "pages": pages}
 
     def update_club(self, club_id: int, payload: ClubUpdate) -> Club:
         club = self.clubs.get(club_id)

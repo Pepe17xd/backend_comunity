@@ -27,3 +27,11 @@ class ClubRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PaginatedClubs(BaseModel):
+    items: list[ClubRead]
+    total: int
+    page: int
+    size: int
+    pages: int

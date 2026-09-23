@@ -14,15 +14,19 @@ class ClubRepository:
     def get_by_name(self, name: str) -> Club | None:
         return self.db.scalar(select(Club).where(Club.name == name))
 
-    def list(self, skip: int = 0, limit: int = 50) -> list[Club]:
-        stmt = (
-            select(Club)
-            .where(Club.is_active.is_(True))
-            .offset(skip)
-            .limit(limit)
-            .order_by(Club.id)
-        )
+    def list(self, skip: int = 0, limit: int = 50, search: str | None = None) -> list[Club]:
+        stmt = select(Club).where(Club.is_active.is_(True))
+        if search:
+            stmt = stmt.where(Club.name.ilike(f"%{search}%"))
+        stmt = stmt.offset(skip).limit(limit).order_by(Club.id)
         return list(self.db.scalars(stmt).all())
+
+    def count(self, search: str | None = None) -> int:
+        from sqlalchemy import func
+        stmt = select(func.count(Club.id)).where(Club.is_active.is_(True))
+        if search:
+            stmt = stmt.where(Club.name.ilike(f"%{search}%"))
+        return self.db.scalar(stmt) or 0
 
     def add(self, club: Club) -> Club:
         self.db.add(club)
